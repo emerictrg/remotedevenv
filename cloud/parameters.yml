@@ -1,0 +1,16 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Remote environment - Component: Parameter stores"
+
+Resources:
+
+ PipelineSourceStorage:
+  Type: "AWS::SSM::Parameter"
+  Properties:
+    Type: "String"
+    DataType: "text"
+    Description: "Storage used to store artefact during CI/CD pipeline"
+    Name: "remoteenv.sourceStorage"
+    Value: "value-to-be-updated"
+    Tags:
+      Application: "remoteenv"
+
