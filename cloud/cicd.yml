@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "RemoteDevEnv CI/CD"
+
+
+Resources:
+
+  SourceStorage:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub "etrg-${AWS::StackName}-artifacts"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "AWS::StackName"
+
