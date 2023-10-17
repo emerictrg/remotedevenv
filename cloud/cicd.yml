@@ -12,3 +12,95 @@ Resources:
         - Key: "Application"
           Value: !Ref "AWS::StackName"
 
+  ImageRepository:
+    Type: "AWS::ECR::Repository"
+    Properties:
+      RepositoryName: !Sub "${AWS::StackName}-pipeline"
+      RepositoryPolicyText:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "allow-push"
+            Effect: "Allow"
+            Principal:
+              AWS:
+                - !Ref "AWS::AccountId"
+            Action:
+              - "ecr:PutImage"
+              - "ecr:InitiateLayerUpload"
+              - "ecr:UploadLayerPart"
+              - "ecr:CompleteLayerUpload"
+          - Sid: "allow-pull"
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "codebuild.amazonaws.com"
+            Action:
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:BatchGetImage"
+              - "ecr:BatchCheckLayerAvailability"
+
+  PipelineRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "codepipeline.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "allow-push-artifacts"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "codestar-connections:UseConnection"
+                Resource:
+                  - !ImportValue "GitHubCodeStarConnection:Arn"
+              - Effect: "Allow"
+                Action:
+                  - "s3:*"
+                Resource:
+                  - !GetAtt "SourceStorage.Arn"
+                  - !Sub 
+                    - "${bucketArn}/*"
+                    - { "bucketArn": !GetAtt "SourceStorage.Arn" }
+
+  Pipeline:
+    Type: "AWS::CodePipeline::Pipeline"
+    Properties:
+      Name: !Sub "${AWS::StackName}-pipeline"
+      RoleArn: !GetAtt "PipelineRole.Arn"
+      ArtifactStore:
+        Type: "S3"
+        Location: !Ref "SourceStorage"
+      RestartExecutionOnUpdate: False
+      Stages:
+        - Name: "PullSource"
+          Actions:
+            - ActionTypeId:
+                Category: "Source"
+                Owner: "AWS"
+                Provider: "CodeStarSourceConnection"
+                Version: 1
+              Name: "DownloadSource"
+              Configuration:
+                ConnectionArn: !ImportValue "GitHubCodeStarConnection:Arn"
+                FullRepositoryId: "emerictrg/remotedevenv"
+                BranchName: "main"
+                DetectChanges: True
+              OutputArtifacts:
+                - Name: "source-from-repo"
+        - Name: "Approve"
+          Actions:
+            - ActionTypeId:
+                Category: "Approval"
+                Owner: "AWS"
+                Provider: "Manual"
+                Version: 1
+              Name: "temp-approval"
+                  
