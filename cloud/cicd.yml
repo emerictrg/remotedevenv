@@ -39,6 +39,89 @@ Resources:
               - "ecr:BatchGetImage"
               - "ecr:BatchCheckLayerAvailability"
 
+  BuilderServiceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-builder-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "codebuild.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess"
+        - "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+      Policies:
+        - PolicyName: "allow-put-storage"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "s3:GetObject"
+                  - "s3:PutObject"
+                Resource:
+                  - !GetAtt "SourceStorage.Arn"
+                  - !Sub
+                    - "${bucketArn}/*"
+                    - { "bucketArn": !GetAtt "SourceStorage.Arn" }
+
+  CiBuilder:
+    Type: "AWS::CodeBuild::Project"
+    Properties:
+      Name: !Sub "${AWS::StackName}-test-builder"
+      Description: "Builder for testing project"
+      Artifacts:
+        Type: "CODEPIPELINE"
+      LogsConfig:
+        CloudWatchLogs:
+          Status: "ENABLED"
+      Environment:
+        Type: "LINUX_CONTAINER"
+        ComputeType: "BUILD_GENERAL1_SMALL"
+        Image: !Sub
+          - "${image}:latest"
+          - { "image": !GetAtt "ImageRepository.RepositoryUri" }
+        ImagePullCredentialsType: "CODEBUILD"
+      Source:
+        Type: "CODEPIPELINE"
+        BuildSpec: "cloud/buildspec/test.yml"
+      ServiceRole: !GetAtt "BuilderServiceRole.Arn"
+      Visibility: "PRIVATE"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "AWS::StackName"
+
+  CdBuilder:
+    Type: "AWS::CodeBuild::Project"
+    Properties:
+      Name: !Sub "${AWS::StackName}-package-builder"
+      Description: "Builder for packaging project"
+      Artifacts:
+        Type: "CODEPIPELINE"
+      LogsConfig:
+        CloudWatchLogs:
+          Status: "ENABLED"
+      Environment:
+        Type: "LINUX_CONTAINER"
+        ComputeType: "BUILD_GENERAL1_SMALL"
+        Image: !Sub
+          - "${image}:latest"
+          - { "image": !GetAtt "ImageRepository.RepositoryUri" }
+        ImagePullCredentialsType: "CODEBUILD"
+      Source:
+        Type: "CODEPIPELINE"
+        BuildSpec: "cloud/buildspec/build.yml"
+      ServiceRole: !GetAtt "BuilderServiceRole.Arn"
+      Visibility: "PRIVATE"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "AWS::StackName"
+
   PipelineRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -69,6 +152,16 @@ Resources:
                   - !Sub 
                     - "${bucketArn}/*"
                     - { "bucketArn": !GetAtt "SourceStorage.Arn" }
+        - PolicyName: "allow-launch-builder"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "codebuild:*"
+                Resource:
+                  - !GetAtt "CiBuilder.Arn"
+                  - !GetAtt "CdBuilder.Arn"
 
   Pipeline:
     Type: "AWS::CodePipeline::Pipeline"
@@ -95,12 +188,19 @@ Resources:
                 DetectChanges: True
               OutputArtifacts:
                 - Name: "source-from-repo"
-        - Name: "Approve"
+        - Name: "UnitTests"
           Actions:
             - ActionTypeId:
-                Category: "Approval"
+                Category: "Test"
                 Owner: "AWS"
-                Provider: "Manual"
+                Provider: "CodeBuild"
                 Version: 1
-              Name: "temp-approval"
+              Name: "LaunchUnitTests"
+              Configuration:
+                ProjectName: !Ref "CiBuilder"
+              InputArtifacts:
+                - Name: "source-from-repo"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "AWS::StackName"
                   
