@@ -134,6 +134,8 @@ Resources:
                 - "codepipeline.amazonaws.com"
             Action:
               - "sts:AssumeRole"
+      ManagedPolicyArns:
+          - "arn:aws:iam::aws:policy/AWSCloudFormationFullAccess"
       Policies:
         - PolicyName: "allow-push-artifacts"
           PolicyDocument:
@@ -162,6 +164,17 @@ Resources:
                 Resource:
                   - !GetAtt "CiBuilder.Arn"
                   - !GetAtt "CdBuilder.Arn"
+        - PolicyName: "allow-pass-role"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              Effect: "Allow"
+              Action:
+                - "iam:PassRole"
+              Resource: "*"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "AWS::StackName"
 
   CFExecutionRole:
     Type: "AWS::IAM::Role"
@@ -176,6 +189,15 @@ Resources:
                 - "cloudformation.amazonaws.com"
             Action:
               - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "allow-manage-apigateway"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "apigateway:*"
+                Resource: "*"
       Tags:
         - Key: "Application"
           Value: !Ref "AWS::StackName"
