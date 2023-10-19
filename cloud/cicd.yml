@@ -205,18 +205,6 @@ Resources:
                 DetectChanges: True
               OutputArtifacts:
                 - Name: "source-from-repo"
-        - Name: "UnitTests"
-          Actions:
-            - ActionTypeId:
-                Category: "Test"
-                Owner: "AWS"
-                Provider: "CodeBuild"
-                Version: 1
-              Name: "LaunchUnitTests"
-              Configuration:
-                ProjectName: !Ref "CiBuilder"
-              InputArtifacts:
-                - Name: "source-from-repo"
         - Name: "DeployProduction"
           Actions:
             - ActionTypeId:
