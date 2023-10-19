@@ -12,6 +12,16 @@ Resources:
         - Key: "Application"
           Value: !Ref "AWS::StackName"
 
+  CFTemplateStorage:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub "etrg-${AWS::StackName}-cf-templates"
+      VersioningConfiguration:
+        Status: "Enabled"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "AWS::StackName"
+
   ImageRepository:
     Type: "AWS::ECR::Repository"
     Properties:

@@ -1,0 +1,16 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Remote development environment full stack"
+
+Parameters:
+
+  GatewayTemplateUrl:
+    Type: "String"
+    Description: "s3 path to the gateway cloudformation template"
+
+Resources:
+
+  GatewayStack:
+    Type: "AWS::Cloudformation::Stack"
+    Properties:
+      TemplateURL: !Ref "GatewayTemplateUrl"
+
