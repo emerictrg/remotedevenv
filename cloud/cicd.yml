@@ -163,6 +163,23 @@ Resources:
                   - !GetAtt "CiBuilder.Arn"
                   - !GetAtt "CdBuilder.Arn"
 
+  CFExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Description: "Cloudformation execution role to deploy the stack"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "cloudformation.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "AWS::StackName"
+
   Pipeline:
     Type: "AWS::CodePipeline::Pipeline"
     Properties:
@@ -198,6 +215,22 @@ Resources:
               Name: "LaunchUnitTests"
               Configuration:
                 ProjectName: !Ref "CiBuilder"
+              InputArtifacts:
+                - Name: "source-from-repo"
+        - Name: "DeployProduction"
+          Actions:
+            - ActionTypeId:
+                Category: "Deploy"
+                Owner: "AWS"
+                Provider: "CloudFormation"
+                Version: 1
+              Name: "DeployApi"
+              Configuration:
+                ActionMode: "CREATE_UPDATE"
+                StackName: "remotedevenv-api"
+                ChangeSetName: "codepipeline-changes"
+                TemplatePath: "source-from-repo::cloud/api.yml"
+                RoleArn: !GetAtt "CFExecutionRole.Arn"
               InputArtifacts:
                 - Name: "source-from-repo"
       Tags:

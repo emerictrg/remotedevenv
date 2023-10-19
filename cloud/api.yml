@@ -1,0 +1,11 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "API used to manage EC2"
+
+
+Resources:
+
+  Gateway:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name: !Sub "${AWS::StackName}-api"
+
