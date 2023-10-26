@@ -274,9 +274,9 @@ Resources:
                 Owner: "AWS"
                 Provider: "CodeBuild"
                 Version: 1
-              Name: "Build CF Package"
+              Name: "BuildCFPackage"
               Configuration:
-                ProjectName: !Ref "CiBuilder"
+                ProjectName: !Ref "CdBuilder"
               InputArtifacts:
                 - Name: "source-from-repo"
               OutputArtifacts:

@@ -5,13 +5,13 @@ phases:
   install:
     on-failure: "ABORT"
     commands:
-      - apt update && apt upgrade
-      - apt install zip
+      - echo "no install phase"
 
   build:
     commands:
-      - "zip packaged-cf-templates.zip cloud/stack/*.yml"
+      - echo "build cf templates"
 
   artifcts:
     files:
-      - packaged-cf-templates.zip
+      - cloud/stack/*.yml
+
