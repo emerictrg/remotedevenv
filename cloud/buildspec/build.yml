@@ -7,11 +7,19 @@ phases:
     commands:
       - echo "no install phase"
 
+  pre_build:
+    commands:
+      - echo "pre build"
+
   build:
     commands:
       - echo "build cf templates"
 
-  artifcts:
-    files:
-      - cloud/stack/*.yml
+  post_build:
+    commands:
+      - echo "Post Build"
+
+artifacts:
+  files:
+    - cloud/stack/*.yml
 
