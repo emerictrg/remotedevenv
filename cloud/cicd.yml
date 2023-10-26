@@ -22,6 +22,26 @@ Resources:
         - Key: "Application"
           Value: !Ref "AWS::StackName"
 
+  CFTemplateStoragePolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref "CFTemplateStorage"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "s3:Get*"
+              - "s3:List*"
+            Effect: "Allow"
+            Principal: 
+              Service:
+                - "cloudformation.amazonaws.com"
+            Resource: 
+              - !Join 
+                - ""
+                - - "arn:aws:s3:::"
+                  - !Ref CFTemplateStorage
+
   ImageRepository:
     Type: "AWS::ECR::Repository"
     Properties:
@@ -211,6 +231,14 @@ Resources:
               - Effect: "Allow"
                 Action:
                   - "apigateway:*"
+                Resource: "*"
+        - PolicyName: "allow-load-stack-template"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "s3:*"
                 Resource: "*"
       Tags:
         - Key: "Application"
