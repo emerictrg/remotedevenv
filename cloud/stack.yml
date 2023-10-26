@@ -10,7 +10,7 @@ Parameters:
 Resources:
 
   GatewayStack:
-    Type: "AWS::Cloudformation::Stack"
+    Type: "AWS::CloudFormation::Stack"
     Properties:
       TemplateURL: !Ref "GatewayTemplateUrl"
 

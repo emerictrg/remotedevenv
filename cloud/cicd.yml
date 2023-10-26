@@ -164,6 +164,10 @@ Resources:
                   - !Sub 
                     - "${bucketArn}/*"
                     - { "bucketArn": !GetAtt "SourceStorage.Arn" }
+                  - !GetAtt "CFTemplateStorage.Arn"
+                  - !Sub 
+                    - "${bucketArn}/*"
+                    - { "bucketArn": !GetAtt "CFTemplateStorage.Arn" }
         - PolicyName: "allow-launch-builder"
           PolicyDocument:
             Version: "2012-10-17"
@@ -237,7 +241,7 @@ Resources:
                 DetectChanges: True
               OutputArtifacts:
                 - Name: "source-from-repo"
-        - Name: "DeployProduction"
+        - Name: "LoadSubStack"
           Actions:
             - ActionTypeId:
                 Category: "Deploy"
@@ -251,6 +255,8 @@ Resources:
                 ObjectKey: "api.yml"
               InputArtifacts:
                 - Name: "source-from-repo"
+        - Name: "DeployProduction"
+          Actions:
             - ActionTypeId:
                 Category: "Deploy"
                 Owner: "AWS"
@@ -261,8 +267,12 @@ Resources:
                 ActionMode: "CREATE_UPDATE"
                 StackName: "remotedevenv-api"
                 ChangeSetName: "codepipeline-changes"
-                TemplatePath: "source-from-repo::cloud/api.yml"
+                TemplatePath: "source-from-repo::cloud/stack.yml"
                 RoleArn: !GetAtt "CFExecutionRole.Arn"
+                ParameterOverrides: |
+                  {
+                    "GatewayTemplateUrl": { "Fn::GetArtifactAtt" : [ "source-from-repo", "URL" ] }
+                  }
               InputArtifacts:
                 - Name: "source-from-repo"
       Tags:
