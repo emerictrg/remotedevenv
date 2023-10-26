@@ -242,6 +242,18 @@ Resources:
             - ActionTypeId:
                 Category: "Deploy"
                 Owner: "AWS"
+                Provider: "S3"
+                Version: 1
+              Name: "LoadSubStack"
+              Configuration:
+                BucketName: !Ref "CFTemplateStorage"
+                Extract: False
+                ObjectKey: "api.yml"
+              InputArtifacts:
+                - Name: "source-from-repo"
+            - ActionTypeId:
+                Category: "Deploy"
+                Owner: "AWS"
                 Provider: "CloudFormation"
                 Version: 1
               Name: "DeployApi"
