@@ -1,0 +1,17 @@
+
+version: 0.2
+
+phases:
+  install:
+    on-failure: "ABORT"
+    commands:
+      - apt update && apt upgrade
+      - apt install zip
+
+  build:
+    commands:
+      - "zip packaged-cf-templates.zip cloud/stack/*.yml"
+
+  artifcts:
+    files:
+      - packaged-cf-templates.zip

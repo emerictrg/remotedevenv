@@ -113,9 +113,7 @@ Resources:
       Environment:
         Type: "LINUX_CONTAINER"
         ComputeType: "BUILD_GENERAL1_SMALL"
-        Image: !Sub
-          - "${image}:latest"
-          - { "image": !GetAtt "ImageRepository.RepositoryUri" }
+        Image: "aws/codebuild/standard:7.0"
         ImagePullCredentialsType: "CODEBUILD"
       Source:
         Type: "CODEPIPELINE"
@@ -269,6 +267,20 @@ Resources:
                 DetectChanges: True
               OutputArtifacts:
                 - Name: "source-from-repo"
+        - Name: "Build"
+          Actions:
+            - ActionTypeId:
+                Category: "Build"
+                Owner: "AWS"
+                Provider: "CodeBuild"
+                Version: 1
+              Name: "Build CF Package"
+              Configuration:
+                ProjectName: !Ref "CiBuilder"
+              InputArtifacts:
+                - Name: "source-from-repo"
+              OutputArtifacts:
+                - Name: "packaged-cf-templates"
         - Name: "LoadSubStack"
           Actions:
             - ActionTypeId:
@@ -279,10 +291,9 @@ Resources:
               Name: "LoadSubStack"
               Configuration:
                 BucketName: !Ref "CFTemplateStorage"
-                Extract: False
-                ObjectKey: "api.yml"
+                Extract: True
               InputArtifacts:
-                - Name: "source-from-repo"
+                - Name: "packaged-cf-templates"
         - Name: "DeployProduction"
           Actions:
             - ActionTypeId:
