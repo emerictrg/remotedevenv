@@ -277,6 +277,9 @@ Resources:
               Name: "BuildCFPackage"
               Configuration:
                 ProjectName: !Ref "CdBuilder"
+                EnvironmentVariables: !Sub
+                  - '[{"name":"CF_STACK_BUCKET","value":"${Bucket}"}]'
+                  - { "Bucket": !Ref "CFTemplateStorage" } 
               InputArtifacts:
                 - Name: "source-from-repo"
               OutputArtifacts:
@@ -306,12 +309,17 @@ Resources:
                 ActionMode: "CREATE_UPDATE"
                 StackName: "remotedevenv-api"
                 ChangeSetName: "codepipeline-changes"
-                TemplatePath: "packaged-cf-templates:cloud/stack.yml"
+                TemplatePath: "packaged-cf-templates::cloud/stack.yml"
                 RoleArn: !GetAtt "CFExecutionRole.Arn"
                 ParameterOverrides: |
                   {
                     "GatewayTemplateUrl": { 
-                      "Fn::GetArtifactAtt" : ["packaged-cf-templates", "URL"]
+                      "Fn::Sub": [
+                        "https://s3.amazonaws.com/${Bucket}/cloud/stack/api.yml",
+                        {
+                          "Bucket": { "Ref": "CFTemplateStorage" }
+                        }
+                      ]
                     }
                   }
               InputArtifacts:

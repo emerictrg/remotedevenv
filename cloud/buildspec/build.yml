@@ -5,7 +5,8 @@ phases:
   install:
     on-failure: "ABORT"
     commands:
-      - echo "no install phase"
+      - apt update && apt upgrade
+      - apt install jq
 
   pre_build:
     commands:
@@ -13,7 +14,7 @@ phases:
 
   build:
     commands:
-      - echo "build cf templates"
+      - jq -n --arg url $CF_STACK_BUCKET '{"GatewayTemplateUrl":$url}' > cloud/parameters.json
 
   post_build:
     commands:
@@ -22,5 +23,6 @@ phases:
 artifacts:
   files:
     - cloud/stack.yml
+    - cloud/parameters.json
     - cloud/stack/*.yml
 
