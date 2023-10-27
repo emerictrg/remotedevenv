@@ -18,6 +18,7 @@ Resources:
       HttpMethod: "POST"
       ResourceId: !GetAtt "Gateway.RootResourceId"
       RestApiId: !Ref "Gateway"
+      AuthorizationType: "None"
 
   GatewayStageDeployment:
     Type: "AWS::ApiGateway::Deployment"
