@@ -15,14 +15,16 @@ Resources:
   GatewayResource:
     Type: "AWS::ApiGateway::Resource"
     Properties:
+      ParentId: "/"
       PathPart: "myenv"
       RestApiId: !Ref "Gateway"
 
   MyEnvCreate:
-    Type: "AWS::ApiGateway::MethodIntegration"
+    Type: "AWS::ApiGateway::Method"
     Properties:
-      httpMethod: "POST"
-      Type: "AWS"
+      HttpMethod: "POST"
+      ResourceId: !Ref "GatewayResource"
+      RestApiId: !Ref "Gateway"
 
   GatewayStageDeployment:
     Type: "AWS::ApiGateway::Deployment"
