@@ -30,6 +30,8 @@ Resources:
     Type: "AWS::ApiGateway::Deployment"
     Properties:
       RestApiId: !Ref "Gateway"
+    DependsOn:
+      - "MyEnvCreate"
 
   GatewayStage:
     Type: "AWS::ApiGateway::Stage"
