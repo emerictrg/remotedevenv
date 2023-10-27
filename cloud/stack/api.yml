@@ -12,11 +12,17 @@ Resources:
         - Key: "Application"
           Value: !Ref "AWS::StackName"
 
+  GatewayStageDeployment:
+    Type: "AWS::ApiGateway::Deployment"
+    Properties:
+      RestApiId: !Ref "Gateway"
+
   GatewayStage:
     Type: "AWS::ApiGateway::Stage"
     Properties:
       RestApiId: !Ref "Gateway"
       StageName: "main"
+      DeploymentId: !Ref "GatewayStageDeployment"
       Tags:
         - Key: "Application"
           Value: !Ref "AWS::StackName"
