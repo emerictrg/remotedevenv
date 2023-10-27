@@ -17,10 +17,10 @@ default:
 	@just --list --unsorted
 
 cf-changeset filename type="UPDATE":
-		{{awscli}} cloudformation create-change-set \
-				--stack-name $STACKNAME-{{filename}} \
-				--change-set-name {{type}}-$STACKNAME \
-				--change-set-type {{type}} \
-				--capabilities CAPABILITY_NAMED_IAM \
-				--template-body file://cloud/{{filename}}.yml
+	{{awscli}} cloudformation create-change-set \
+		--stack-name $STACKNAME-{{filename}} \
+		--change-set-name {{type}}-$STACKNAME \
+		--change-set-type {{type}} \
+		--capabilities CAPABILITY_NAMED_IAM \
+		--template-body file://cloud/{{filename}}.yml
 
