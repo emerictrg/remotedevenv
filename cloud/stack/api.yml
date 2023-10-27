@@ -12,13 +12,25 @@ Resources:
         - Key: "Application"
           Value: !Ref "AWS::StackName"
 
+  MyEnvCreateTopic:
+    Type: "AWS::SNS::Topic"
+    Properties:
+      TopicName: !Sub "${AWS::StackName}-myenv-create"
+
   MyEnvCreate:
     Type: "AWS::ApiGateway::Method"
     Properties:
       HttpMethod: "POST"
       ResourceId: !GetAtt "Gateway.RootResourceId"
       RestApiId: !Ref "Gateway"
-      AuthorizationType: "None"
+      AuthorizationType: "NONE"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS"
+        Credentials: "arn:aws:iam::*:user/*"
+        Uri: !Sub
+          - "arn:aws:apigateway:${AWS::AccountId}:sns:action/Publish&TopicArn=${sns}"
+          - { "sns": !Ref "MyEnvCreateTopic" }
 
   GatewayStageDeployment:
     Type: "AWS::ApiGateway::Deployment"
