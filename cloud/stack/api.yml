@@ -12,6 +12,18 @@ Resources:
         - Key: "Application"
           Value: !Ref "AWS::StackName"
 
+  GatewayResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      PathPart: "myenv"
+      RestApiId: !Ref "Gateway"
+
+  MyEnvCreate:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      httpMethod: "POST"
+      Type: "AWS"
+
   GatewayStageDeployment:
     Type: "AWS::ApiGateway::Deployment"
     Properties:
