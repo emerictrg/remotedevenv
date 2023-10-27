@@ -19,7 +19,7 @@ Resources:
       RestApiId: !Ref "Gateway"
 
   MyEnvCreate:
-    Type: "AWS::ApiGateway::Method"
+    Type: "AWS::ApiGateway::MethodIntegration"
     Properties:
       httpMethod: "POST"
       Type: "AWS"
