@@ -139,7 +139,9 @@ Resources:
       Environment:
         Type: "LINUX_CONTAINER"
         ComputeType: "BUILD_GENERAL1_SMALL"
-        Image: "aws/codebuild/standard:7.0"
+        Image: !Sub
+          - "${image}:latest"
+          - { "image": !GetAtt "ImageRepository.RepositoryUri" }
         ImagePullCredentialsType: "CODEBUILD"
       Source:
         Type: "CODEPIPELINE"
