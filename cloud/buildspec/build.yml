@@ -5,7 +5,7 @@ phases:
   install:
     on-failure: "ABORT"
     commands:
-      - apt update && apt upgrade
+      - apt update && apt -y upgrade
       - apt install jq
 
   pre_build:
