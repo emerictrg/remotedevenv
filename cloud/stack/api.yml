@@ -17,6 +17,27 @@ Resources:
     Properties:
       TopicName: !Sub "${AWS::StackName}-myenv-create"
 
+  MethodRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "apigateway.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "allow-publish-sns"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "sns:Publish"
+                Resource: !Ref "MyEnvCreateTopic"
+
   MyEnvCreate:
     Type: "AWS::ApiGateway::Method"
     Properties:
@@ -27,9 +48,9 @@ Resources:
       Integration:
         IntegrationHttpMethod: "POST"
         Type: "AWS"
-        Credentials: "arn:aws:iam::*:user/*"
+        Credentials: !GetAtt "MethodRole.Arn"
         Uri: !Sub
-          - "arn:aws:apigateway:${AWS::AccountId}:sns:action/Publish&TopicArn=${sns}"
+          - "arn:aws:apigateway:${AWS::Region}:sns:action/Publish&TopicArn=${sns}"
           - { "sns": !Ref "MyEnvCreateTopic" }
 
   GatewayStageDeployment:

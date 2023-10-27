@@ -240,6 +240,13 @@ Resources:
                 Action:
                   - "s3:*"
                 Resource: "*"
+        - PolicyName: "allow-create-sns"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "sns:*"
+                Resource: "*"
       Tags:
         - Key: "Application"
           Value: !Ref "AWS::StackName"
