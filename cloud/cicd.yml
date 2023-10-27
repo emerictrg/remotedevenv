@@ -278,14 +278,12 @@ Resources:
               Configuration:
                 ProjectName: !Ref "CdBuilder"
                 EnvironmentVariables: !Sub
-                  - '[{"name":"CF_STACK_BUCKET","value":"${Bucket}"}]'
+                  - '[{"name":"CF_STACK_BUCKET","value":"https://s3.amazonaws.com/${Bucket}/cloud/stack/api.yml"}]'
                   - { "Bucket": !Ref "CFTemplateStorage" } 
               InputArtifacts:
                 - Name: "source-from-repo"
               OutputArtifacts:
                 - Name: "packaged-cf-templates"
-        - Name: "LoadSubStack"
-          Actions:
             - ActionTypeId:
                 Category: "Deploy"
                 Owner: "AWS"
@@ -296,7 +294,7 @@ Resources:
                 BucketName: !Ref "CFTemplateStorage"
                 Extract: True
               InputArtifacts:
-                - Name: "packaged-cf-templates"
+                - Name: "source-from-repo"
         - Name: "DeployProduction"
           Actions:
             - ActionTypeId:
@@ -313,14 +311,7 @@ Resources:
                 RoleArn: !GetAtt "CFExecutionRole.Arn"
                 ParameterOverrides: |
                   {
-                    "GatewayTemplateUrl": { 
-                      "Fn::Sub": [
-                        "https://s3.amazonaws.com/${Bucket}/cloud/stack/api.yml",
-                        {
-                          "Bucket": { "Ref": "CFTemplateStorage" }
-                        }
-                      ]
-                    }
+                    "GatewayTemplateUrl": { "Fn::GetParam": [ "packaged-cf-templates", "cloud/parameters.json", "GatewayTemplateUrl" ] }
                   }
               InputArtifacts:
                 - Name: "packaged-cf-templates"
