@@ -8,4 +8,15 @@ Resources:
     Type: "AWS::ApiGateway::RestApi"
     Properties:
       Name: !Sub "${AWS::StackName}-api"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "AWS::StackName"
 
+  GatewayStage:
+    Type: "AWS::ApiGateway::Stage"
+    Properties:
+      RestApiId: !Ref "Gateway"
+      Name: "main"
+      Tags:
+        - Key: "Application"
+          Value: !Ref "AWS::StackName"
