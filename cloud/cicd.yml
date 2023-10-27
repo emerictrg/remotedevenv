@@ -40,7 +40,7 @@ Resources:
               - !Join 
                 - ""
                 - - "arn:aws:s3:::"
-                  - !Ref CFTemplateStorage
+                  - !Ref "CFTemplateStorage"
 
   ImageRepository:
     Type: "AWS::ECR::Repository"
@@ -306,14 +306,16 @@ Resources:
                 ActionMode: "CREATE_UPDATE"
                 StackName: "remotedevenv-api"
                 ChangeSetName: "codepipeline-changes"
-                TemplatePath: "source-from-repo::cloud/stack.yml"
+                TemplatePath: "packaged-cf-templates:cloud/stack.yml"
                 RoleArn: !GetAtt "CFExecutionRole.Arn"
                 ParameterOverrides: |
                   {
-                    "GatewayTemplateUrl": { "Fn::GetArtifactAtt" : [ "source-from-repo", "URL" ] }
+                    "GatewayTemplateUrl": { 
+                      "Fn::GetArtifactAtt" : ["packaged-cf-templates", "URL"]
+                    }
                   }
               InputArtifacts:
-                - Name: "source-from-repo"
+                - Name: "packaged-cf-templates"
       Tags:
         - Key: "Application"
           Value: !Ref "AWS::StackName"
